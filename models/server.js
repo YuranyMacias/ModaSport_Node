@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 const { PORT } = require('../config');
+const { dbConnection } = require('../database/config');
 
 
 class Server {
@@ -13,8 +14,15 @@ class Server {
             products: '/api/products'
         }
         
+        this.connectDB();
+
         this.middelewares();
+
         this.routes();
+    }
+
+    async connectDB(){
+        await dbConnection();
     }
 
     middelewares(){
