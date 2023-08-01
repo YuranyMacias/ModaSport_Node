@@ -11,8 +11,10 @@ class Server {
         this.port = PORT;
 
         this.paths = {
-            products: '/api/products'
-        }
+            products: '/api/products',
+            users: '/api/users',
+            auth: '/api/auth',
+        }       
         
         this.connectDB();
 
@@ -26,7 +28,7 @@ class Server {
     }
 
     middelewares(){
-        // cors
+        // cors: configuracion de permisos
          this.app.use(cors())
 
         // lectura y analisis de los datos recibidos
@@ -36,6 +38,8 @@ class Server {
 
     routes(){
         this.app.use(this.paths.products, require('../routes/product'))
+        this.app.use(this.paths.users, require('../routes/user'))
+        this.app.use(this.paths.auth, require('../routes/auth'))
     }
 
     listen() {
@@ -45,6 +49,4 @@ class Server {
     }
 
 }
-
-
 module.exports = Server;
