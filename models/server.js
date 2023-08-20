@@ -33,6 +33,9 @@ class Server {
 
         // lectura y analisis de los datos recibidos
         this.app.use(express.json());
+
+        //directorio público
+        this.app.use( express.static('public'));
     }
 
 

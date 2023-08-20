@@ -1,9 +1,10 @@
-const { response } = require('express')
-const bcryptjs = require('bcryptjs')
+const { request, response } = require('express');
+const bcryptjs = require('bcryptjs');
 
 const User = require('../models/user');
 
 const { generarJWT } = require('../helpers/generate-jwt');
+const { googleVerify } = require('../helpers/google-verify');
 
 
 const login = async (req, res = response) => {
@@ -42,8 +43,8 @@ const login = async (req, res = response) => {
         const token = await generarJWT(user.id);
 
         res.json({
-           user,
-           token
+            user,
+            token
         })
 
     } catch (error) {
@@ -57,6 +58,55 @@ const login = async (req, res = response) => {
 }
 
 
+const googleSignIn = async (req = request, res = response) => {
+    const { id_token } = req.body;
+
+    try {
+
+        const { name, picture, email } = await googleVerify(id_token);
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            // se tiene que crear el usuario.
+            const data = {
+                name,
+                email,
+                // hay un procedimiento para validar la contraseña anteriormente.
+                password: ':)',
+                img: picture,
+                role: 'USER_ROLE',
+                google: true
+            };
+
+            user = new User(data);
+            await user.save();
+        }
+
+        //Si el usuario en BD tiene status:"false", se niega la autenticacion
+        if (!user.status) {
+            return res.status(401).json({
+                message: 'Usuario bloqueado, comunicarse con el administrador.'
+            });
+        }
+
+        // Generate the JWT
+        const token = await generarJWT(user.id);
+
+        res.json({
+            message: 'Google token ',
+            user,
+            token
+        });
+
+    } catch (error) {
+        res.status(400).json({
+            message: 'El Token no se pudo verificar.'
+        });
+    }
+
+}
 module.exports = {
-    login
+    login,
+    googleSignIn
 }

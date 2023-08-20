@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sign-in</title>
+</head>
+
+<body>
+    <h1>Google Sign-in</h1>
+    <hr>
+
+    <div id="g_id_onload"
+        data-client_id="671858122859-fa8ka39qgcqhfc6nl38gf20ggksot5rn.apps.googleusercontent.com"
+        data-auto_prompt="false" 
+        data-callback="handleCredentialResponse">
+    </div>
+    <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
+        data-shape="rectangular" data-logo_alignment="left">
+    </div>
+
+    <button id="google_signout">
+        Signout
+    </button>
+
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        function handleCredentialResponse(response) {
+            // Google token: IG_TOKEN
+            // console.log('id_token: ', response.credential);
+            const body = { id_token: response.credential }
+
+            //transformar a una peticion post.
+            fetch('http://localhost:3000/api/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            })
+            .then(resp => resp.json())
+            .then(resp => {
+                console.log(resp)
+                // aqui se almacena el correo.
+                localStorage.setItem('email', resp.user.email);
+            })
+            .catch(console.warn)
+
+        }
+
+        //Signout: boton que cierra el correo con el que nos logeamos anteriormente.
+        const btnSignout = document.getElementById('google_signout');
+        btnSignout.onclick = () => {
+            console.log(google.accounts.id);
+            google.accounts.id.disableAutoSelect();
+
+            google.accounts.id.revoke( localStorage.getItem('email'), done =>{
+                localStorage.clear();
+                location.reload();
+            });
+        }
+
+    </script>
+</body>
+
+</html>
