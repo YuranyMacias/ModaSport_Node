@@ -23,14 +23,25 @@ const router = Router();
 // se espera tres parametros: 1- ruta, colita final 
 //                            2- middelewares o validaciones: logeado, ni admin.. este bien.
 //                             3- metodo del controlador (crear, editar..)
-router.get('/', getUser)
+router.get('/', [
+    validateJWT,
+    isAdminRole,
+],getUser)
 
-router.get('/:id', [], getUserById)
+router.get('/:id', [
+    validateJWT,
+    check('id', 'No es un ID válido.').isMongoId(),
+    validarCampos,
+    check('id').custom(existsUserById),
+    validarCampos
+], getUserById)
 
 router.post('/', [
     check('name', 'El nombre es obligatorio').not().isEmpty(),
     check('lastname', 'El apellido es obligatorio').not().isEmpty(),
+    check('password', 'La contraseña es obligatoria.').not().isEmpty(),
     check('password', 'La contraseña debe ser más de 6 letras').isLength({ min: 6 }),
+    check('email', 'El email es obligatorio.').not().isEmpty(),
     check('email', 'El email no es valido').isEmail(),
     check('email').custom(isValidEmail),
     // check('role', 'No es un rol valido').isIn(['ADMIN_ROLE','USER_ROLE', 'SALES_ROLE']),
@@ -42,7 +53,9 @@ router.post('/', [
 ], createUser);
 
 router.put('/:id', [
+    validateJWT,
     check('id', 'No es un Id valido').isMongoId(),
+    validarCampos,
     check('id').custom(existsUserById),
     check('role').custom(isValidRole),
     validarCampos
@@ -50,9 +63,10 @@ router.put('/:id', [
 
 router.delete('/:id', [
     validateJWT,
-    //isAdminRole,
-    hasRole('ADMIN_ROLE','SALES_ROLE'),
+    isAdminRole,
+    //hasRole('ADMIN_ROLE','SALES_ROLE'),
     check('id', 'No es un Id valido').isMongoId(),
+    validarCampos,
     check('id').custom(existsUserById),
     validarCampos
 ], deleteUser);

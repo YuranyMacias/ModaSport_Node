@@ -6,16 +6,18 @@ const { User } = require("../models");
 const getUser = async (req = request, res = response) => {
     try {
         //paginacion de usuarios.  pregintar validacion para no recibir letras
-        const { limite = 5, desde= 0 } = req.query;
-        const [totalUser, users] = await Promise.all([
-            User.countDocuments({ status: true }),
-            User.find({ status: true })
-            .skip( Number(desde))
-            .limit(Number(limite)),
-        ])
+        const { offset = 0, limit = 10 } = req.query;
+        const queryStatus = { status: true };
+    
+        const [totalUsers, users] = await Promise.all([
+            User.countDocuments(queryStatus),
+            User.find(queryStatus)
+            .skip(Number(offset))
+            .limit(Number(limit))
+        ]);
+        
         res.json({
-            menssage: 'Consultando Usuarios.',
-            totalUser,
+            totalUsers,
             users
         });
     } catch (error) {
@@ -27,7 +29,7 @@ const getUser = async (req = request, res = response) => {
 }
 const getUserById = async (req, res) => {
     try {
-        const id = req.params.id;
+        const { id } = req.params;
         const user = await User.findById(id)
         res.json({
             menssage: 'Consultando Usuarios por Id.',
@@ -73,7 +75,7 @@ const createUser = async (req, res) => {
 }
 const updateUser = async (req, res) => {
     try {
-        const id = req.params.id;
+        const { id } = req.params;
         const { _id, google, password, email, status, ...body } = req.body;
         const data = {
             ...body
@@ -87,11 +89,7 @@ const updateUser = async (req, res) => {
 
         const user = await User.findByIdAndUpdate(id, data, { new: true })
 
-        res.json({
-            menssage: 'Editar Usuario.',
-            id,
-            user,
-        });
+        res.json(user);
     } catch (error) {
         console.log('Error al editar el usuario', error);
         res.status(500).json({
@@ -103,7 +101,7 @@ const updateUser = async (req, res) => {
 }
 const deleteUser = async (req, res) => {
     try {
-        const id = req.params.id;
+        const { id }= req.params;
 
         const data = {
             status: false,
@@ -113,7 +111,6 @@ const deleteUser = async (req, res) => {
 
         res.json({
             menssage: 'Eliminar Usuario.',
-            id,
             user,
         });
     } catch (error) {

@@ -51,18 +51,31 @@ const ProductSchema = Schema({
         default: true,
         required: true
     },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref:'User',
+        required: true
+    },
+    category: {
+        type:Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
+    },
+    gender: {
+        type: Schema.Types.ObjectId,
+        ref: 'Gender',
+        required: true
+    },
+    season: {
+        type: Schema.Types.ObjectId,
+        ref: 'Season',
+        required: true
 
-    // user: {
-    //     type: Schema.Types.ObjectId,
-    //     ref:'User',
-    //     required: true
-    // }
-
-
+    },
 }, { timestamps: true })
 
 ProductSchema.methods.toJSON = function() {
-    const {price, ...data} = this.toObject();
+    const {  __v, status, price, ...data } = this.toObject();
     return {
         price: (price) ? parseFloat(price) : 0,
         ...data
