@@ -32,64 +32,103 @@ const getCategory = async (req = request, res = response) => {
 
 
 const getCategoryById = async (req = request, res = response) => {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const category = await Category.findById(id).populate('user', 'name');
+        const category = await Category.findById(id).populate('user', 'name');
 
-    res.json(category);
+        res.json(category);
+        
+    } catch (error) {
+        console.log('Error al consultar la categoria', error);
+        res.status(500).json({
+            error: 'Error al consultar la categoria por Id.'
+        })
+        
+    }
+    
 }
 
 
 const createCategory = async (req = request, res = response) => {
-    const name = req.body.name.toUpperCase();
+    try {
+        const name = req.body.name.toUpperCase();
 
-    const existsCategory = await Category.findOne({ name });
-
-    if (existsCategory) {
-        return res.status(400).json({
-            message: `La categoría ${existsCategory.name} ya existe.`
-        });
+        const existsCategory = await Category.findOne({ name });
+    
+        if (existsCategory) {
+            return res.status(400).json({
+                message: `La categoría ${existsCategory.name} ya existe.`
+            });
+        }
+    
+        // Generar la data a guardar
+        const data = {
+            name,
+            // debe ser un id de mongo.
+            user: req.user._id
+        }
+    
+        const category = new Category(data);
+        await category.save();
+    
+        res.status(201).json(category);
+        
+    } catch (error) {
+        console.log('Error al crear la categoria', error);
+        res.status(500).json({
+            error: 'Error al crear la categoria.'
+        })
+        
     }
-
-    // Generar la data a guardar
-    const data = {
-        name,
-        // debe ser un id de mongo.
-        user: req.user._id
-    }
-
-    const category = new Category(data);
-    await category.save();
-
-    res.status(201).json(category);
+ 
 }
 
 
 const updateCategory = async (req = request, res = response) => {
 
-    const { id } = req.params;
-    const { status, user, ...body } = req.body;
+    try {
+        const { id } = req.params;
+        const { status, user, ...body } = req.body;
+    
+        body.name = body.name.toUpperCase();
+        body.user = req.user._id;
+    
+        const category = await Category.findByIdAndUpdate(id, body, { new: true })
+    
+        res.json(category);
+        
+    } catch (error) {
+        console.log('Error al modificar la categoria', error);
+        res.status(500).json({
+            error: 'Error al modificar la categoria.'
+        })
+        
+    }
 
-    body.name = body.name.toUpperCase();
-    body.user = req.user._id;
-
-    const category = await Category.findByIdAndUpdate(id, body, { new: true })
-
-    res.json(category);
+   
 
 }
 
 const deleteCategory = async (req = request, res = response) => {
 
-    const { id } = req.params;
-    const user = req.user._id;
+    try {
+
+        const { id } = req.params;
+        const user = req.user._id;
 
 
-    const category = await Category.findByIdAndUpdate(id, { status: false, user }, { new: true })
+        const category = await Category.findByIdAndUpdate(id, { status: false, user }, { new: true })
 
-    res.json(category);
-
-
+        res.json(category);
+        
+    } catch (error) {
+        console.log('Error al eliminar la categoria', error);
+        res.status(500).json({
+            error: 'Error al eliminar la categoria.'
+        })
+        
+    }
 
 }
 

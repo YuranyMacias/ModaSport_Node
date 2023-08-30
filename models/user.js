@@ -23,8 +23,8 @@ const UserSchema = Schema ({
         default: ''
     },
     images: {
-        type: [String],
-        default: []
+        type: String,
+        default: ''
     },
     role: {
         type: String,

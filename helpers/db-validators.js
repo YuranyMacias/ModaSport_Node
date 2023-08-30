@@ -69,6 +69,15 @@ const existsSeasonById = async (id = '') => {
     }
 }
 
+// validar colecciones permitidas
+const iscollectionsAuthorized = (collection = '', collections = []) => {
+    const isIncluded = collections.includes(collection);
+    if (!isIncluded) {
+        throw new Error(`Colección (${collection}) no está autorizada, Autorizadas: ${collections}`);
+    }
+    return true;
+}
+
 module.exports = {
     isValidRole,
     isValidEmail,
@@ -77,4 +86,5 @@ module.exports = {
     existsProductById,
     existsGenderById,
     existsSeasonById,
+    iscollectionsAuthorized,
 }
